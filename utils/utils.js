@@ -73,27 +73,31 @@ export function getToken(bearerToken) {
   return bearerToken.split(" ")[1];
 }
 
-export function getSparqlQuery(headline) {
+export function getSparqlQuery(eventName) {
   let query = `
   PREFIX schema: <http://schema.org/>
 
-SELECT ?ual ?name ?fileFormat ?headline ?abstract
-WHERE {
-  GRAPH ?g {
-    ?doc a schema:DigitalDocument;
-         schema:name ?name;
-         schema:fileFormat ?fileFormat;
-         schema:headline ?headline;
-         schema:abstract ?abstract.
-    
-    # Multiple FILTER conditions for different books
-    FILTER (
-      REGEX(?name, "${headline}", "i")
-    )
+  SELECT ?ual ?name ?startDate ?endDate ?location ?organizer ?description
+  WHERE {
+    GRAPH ?g {
+      ?event a schema:Event;
+             schema:name ?name;
+             schema:startDate ?startDate;
+             schema:endDate ?endDate;
+             schema:location ?location;
+             schema:organizer ?organizer;
+             schema:performer ?performer;
+             schema:description ?description.
+      
+      # Filter for events based on the event name
+      FILTER (
+        REGEX(?name, "${eventName}", "i")
+      )
+    }
+    ?ual schema:assertion ?g.
   }
-  ?ual schema:assertion ?g.
-}
-GROUP BY ?ual ?name ?fileFormat ?headline ?abstract
-`;
+  GROUP BY ?ual ?name ?startDate ?endDate ?location ?organizer ?description
+  `;
   return query;
 }
+
