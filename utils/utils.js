@@ -88,7 +88,7 @@ WHERE {
     
     # Multiple FILTER conditions for different books
     FILTER (
-      REGEX(?headline, "${headline}", "i")
+      REGEX(?name, "${headline}", "i")
     )
   }
   ?ual schema:assertion ?g.
