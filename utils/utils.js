@@ -75,29 +75,32 @@ export function getToken(bearerToken) {
 
 export function getSparqlQuery(eventName) {
   let query = `
-  PREFIX schema: <http://schema.org/>
+    PREFIX schema: <http://schema.org/>
 
-  SELECT ?ual ?name ?startDate ?endDate ?location ?organizer ?description
-  WHERE {
-    GRAPH ?g {
-      ?event a schema:Event;
-             schema:name ?name;
-             schema:startDate ?startDate;
-             schema:endDate ?endDate;
-             schema:location ?location;
-             schema:organizer ?organizer;
-             schema:performer ?performer;
-             schema:description ?description.
-      
-      # Filter for events based on the event name
-      FILTER (
-        REGEX(?name, "${eventName}", "i")
-      )
+    SELECT ?ual ?name ?startDate ?endDate ?locationName ?organizerName ?description
+    WHERE {
+      GRAPH ?g {
+        ?event a schema:Event;
+               schema:name ?name;
+               schema:startDate ?startDate;
+               schema:endDate ?endDate;
+               schema:description ?description.
+
+        FILTER (REGEX(?name, "${eventName}", "i"))
+
+        OPTIONAL {
+          ?event schema:location ?locationNode.
+          ?locationNode schema:name ?locationName.
+        }
+
+        OPTIONAL {
+          ?event schema:organizer ?organizerNode.
+          ?organizerNode schema:name ?organizerName.
+        }
+      }
+      ?ual schema:assertion ?g.
     }
-    ?ual schema:assertion ?g.
-  }
-  GROUP BY ?ual ?name ?startDate ?endDate ?location ?organizer ?description
+    GROUP BY ?ual ?name ?startDate ?endDate ?locationName ?organizerName ?description
   `;
   return query;
 }
-
